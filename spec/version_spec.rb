@@ -9,7 +9,9 @@ describe Semantic::Version do
       '1.0.1-pre.5+build.123.5',
       '1.1.1+123',
       '0.0.0+hello',
-      '1.2.3-1'
+      '1.2.3-1',
+      '1.9',
+      '2',
     ]
 
     @bad_versions = [
@@ -18,7 +20,9 @@ describe Semantic::Version do
       'a.3.4',
       '5.2.a',
       'pre3-1.5.3',
-      "I am not a valid semver\n0.0.0\nbut I still pass"
+      "I am not a valid semver\n0.0.0\nbut I still pass",
+      nil,
+      "",
     ]
   end
 
@@ -33,6 +37,24 @@ describe Semantic::Version do
       @bad_versions.each do |v|
         expect { Semantic::Version.new v }.to raise_error()
       end
+    end
+
+    it "adds zeroes for missing terms" do
+      v1 = Semantic::Version.new '1.5'
+      v1.major.should == 1
+      v1.minor.should == 5
+      v1.patch.should == 0
+      v1.pre.should be_nil
+      v1.build.should be_nil
+      v1.to_s.should == "1.5.0"
+
+      v2 = Semantic::Version.new '2'
+      v2.major.should == 2
+      v2.minor.should == 0
+      v2.patch.should == 0
+      v2.pre.should be_nil
+      v2.build.should be_nil
+      v2.to_s.should == "2.0.0"
     end
 
     it "stores parsed versions in member variables" do
@@ -190,7 +212,7 @@ describe Semantic::Version do
   context "type coercions" do
     it "converts to a string" do
       @test_versions.each do |v|
-        Semantic::Version.new(v).to_s.should == v
+        Semantic::Version.new(v).to_s.should start_with v
       end
     end
 
